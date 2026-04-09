@@ -37,11 +37,6 @@
   .success-view { display: none; text-align: center; padding: 3rem 1rem; }
   .success-view h2 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
   .success-view p { font-size: 15px; color: #555; line-height: 1.6; }
-  .score-total { font-size: 48px; font-weight: 700; color: #534AB7; margin: 1.5rem 0 0.5rem; }
-  .fit-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 1.5rem; }
-  .badge-alto { background: #E1F5EE; color: #0F6E56; }
-  .badge-medio { background: #FAEEDA; color: #854F0B; }
-  .badge-baixo { background: #FCEBEB; color: #A32D2D; }
   @media (max-width: 480px) { .likert-circle { width: 30px; height: 30px; font-size: 12px; } }
 </style>
 </head>
@@ -61,17 +56,12 @@
     </div>
 
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
-
     <div id="questions"></div>
-
     <button class="btn" id="submit-btn" onclick="submitTest()">Enviar respostas</button>
     <p class="error-msg" id="error-msg"></p>
   </div>
 
   <div class="success-view" id="success-view">
-    <p style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#888;">Resultado</p>
-    <div class="score-total" id="result-score"></div>
-    <div id="result-badge"></div>
     <h2 id="result-title"></h2>
     <p id="result-desc"></p>
   </div>
@@ -80,41 +70,42 @@
 <script>
 const SHEET_URL = "https://script.google.com/macros/s/AKfycbyZ_TnByO8xX30Cjti5Sm6Y52ScCAu8656DoNveKapHmXi5wYFbAp_6j1IBk8KVDSUB_w/exec";
 
+// reverse: true = pontuação invertida (6 - valor)
 const values = [
   { id: "v1", name: "Os interesses do cliente em primeiro lugar", questions: [
-    "Antes de tomar uma decisão, costumo me perguntar como ela impacta o cliente final.",
-    "Prefiro abrir mão de um resultado interno favorável quando isso beneficia o cliente a longo prazo.",
-    "Acredito que a confiança e a lealdade dos clientes são vantagens competitivas mais duradouras do que métricas de curto prazo."
+    { text: "Antes de tomar uma decisão, costumo me perguntar como ela impacta o cliente final.", reverse: false },
+    { text: "Prefiro abrir mão de um resultado interno favorável quando isso beneficia o cliente a longo prazo.", reverse: false },
+    { text: "Quando há conflito entre uma meta interna e o que é melhor para o cliente, priorizo a meta — afinal, ela existe por algum motivo.", reverse: true }
   ]},
   { id: "v2", name: "Cada detalhe importa", questions: [
-    "Tenho dificuldade em entregar algo que considero abaixo do padrão, mesmo sob pressão de tempo.",
-    "Costumo perceber imperfeições ou inconsistências que outros passam despercebidos.",
-    "Sinto orgulho genuíno quando entrego um trabalho do qual posso me orgulhar inteiramente."
+    { text: "Tenho dificuldade em entregar algo que considero abaixo do padrão, mesmo sob pressão de tempo.", reverse: false },
+    { text: "Costumo perceber imperfeições ou inconsistências que outros passam despercebidos.", reverse: false },
+    { text: "Prefiro entregar rápido e com imperfeições a atrasar para ajustar os detalhes.", reverse: true }
   ]},
   { id: "v3", name: "Voe mais alto, sonhe mais longe", questions: [
-    "Quando defino metas, prefiro colocar alvos ambiciosos que me desafiem de verdade.",
-    "Não me contento facilmente com o resultado 'suficiente' — busco o extraordinário.",
-    "Encaro obstáculos grandes como oportunidades, não como motivos para reduzir expectativas."
+    { text: "Quando defino metas, prefiro colocar alvos ambiciosos que me desafiem de verdade.", reverse: false },
+    { text: "Encaro obstáculos grandes como oportunidades, não como motivos para reduzir expectativas.", reverse: false },
+    { text: "Prefiro metas realistas e alcançáveis a arriscar definir algo que pode não ser atingido.", reverse: true }
   ]},
   { id: "v4", name: "Pense rizomaticamente", questions: [
-    "Me adapto bem a ambientes onde as responsabilidades não são rigidamente definidas.",
-    "Prefiro tomar iniciativas e agir com autonomia do que aguardar aprovações hierárquicas.",
-    "Consigo colaborar de forma eficaz com pessoas de diferentes áreas sem precisar de estrutura formal."
+    { text: "Me adapto bem a ambientes onde as responsabilidades não são rigidamente definidas.", reverse: false },
+    { text: "Prefiro tomar iniciativas e agir com autonomia do que aguardar aprovações hierárquicas.", reverse: false },
+    { text: "Trabalho melhor quando tenho um processo claro e bem definido a seguir.", reverse: true }
   ]},
   { id: "v5", name: "Transforme erros em sabedoria", questions: [
-    "Quando cometo um erro, meu foco principal é entender o que aconteceu e como evitar no futuro.",
-    "Me sinto confortável em admitir falhas para minha equipe quando elas ocorrem.",
-    "Vejo ambientes onde errar é punido como pouco propícios ao meu desenvolvimento."
+    { text: "Quando cometo um erro, meu foco principal é entender o que aconteceu e como evitar no futuro.", reverse: false },
+    { text: "Me sinto confortável em admitir falhas para minha equipe quando elas ocorrem.", reverse: false },
+    { text: "Prefiro resolver o problema sozinho antes de expor um erro para a equipe.", reverse: true }
   ]},
   { id: "v6", name: "Ações transparentes, resultados tangíveis", questions: [
-    "Comunico proativamente quando um prazo ou entrega está em risco, antes de ser cobrado.",
-    "Assumo responsabilidade total pelas minhas entregas, sem transferir a culpa para fatores externos.",
-    "Considero a transparência no processo tão importante quanto a qualidade do resultado final."
+    { text: "Comunico proativamente quando um prazo ou entrega está em risco, antes de ser cobrado.", reverse: false },
+    { text: "Assumo responsabilidade total pelas minhas entregas, sem transferir a culpa para fatores externos.", reverse: false },
+    { text: "Quando algo dá errado, é importante identificar quem ou o que causou o problema antes de agir.", reverse: true }
   ]},
   { id: "v7", name: "O navio é nosso", questions: [
-    "Quando vejo um problema fora da minha área, sinto que também é minha responsabilidade resolvê-lo.",
-    "Prefiro colaborar ativamente na solução de desafios coletivos do que focar exclusivamente nas minhas tarefas.",
-    "Tenho dificuldade em ver um colega sobrecarregado sem oferecer ajuda, mesmo sem ser solicitado."
+    { text: "Quando vejo um problema fora da minha área, sinto que também é minha responsabilidade resolvê-lo.", reverse: false },
+    { text: "Prefiro colaborar ativamente na solução de desafios coletivos do que focar exclusivamente nas minhas tarefas.", reverse: false },
+    { text: "Acredito que cada pessoa deve focar no que é de sua responsabilidade — interferir na área do outro pode atrapalhar.", reverse: true }
   ]}
 ];
 
@@ -129,7 +120,7 @@ function buildQuestions() {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <p>${q}</p>
+        <p>${q.text}</p>
         <div class="likert">
           ${[1,2,3,4,5].map(n => `
             <label>
@@ -169,11 +160,12 @@ function submitTest() {
 
   values.forEach(v => {
     let vSum = 0;
-    v.questions.forEach((_, qi) => {
+    v.questions.forEach((q, qi) => {
       const qid = `${v.id}_q${qi+1}`;
-      const val = parseInt(document.querySelector(`input[name="${qid}"]:checked`).value);
-      payload[qid] = val;
-      vSum += val;
+      const raw = parseInt(document.querySelector(`input[name="${qid}"]:checked`).value);
+      const scored = q.reverse ? (6 - raw) : raw;
+      payload[qid] = raw;
+      vSum += scored;
     });
     grandTotal += vSum;
     grandMax += v.questions.length * 5;
@@ -192,40 +184,18 @@ function submitTest() {
     mode: "no-cors",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
-  }).then(() => {
-    showResult(candidato, pct);
-  }).catch(() => {
-    showResult(candidato, pct);
-  });
+  }).then(() => showResult(candidato))
+    .catch(() => showResult(candidato));
 }
 
-function showResult(candidato, pct) {
+function showResult(candidato) {
   document.getElementById("test-view").style.display = "none";
   const sv = document.getElementById("success-view");
   sv.style.display = "block";
-
-  let badgeClass, badgeLabel, title, desc;
-  if (pct >= 80) {
-    badgeClass = "badge-alto"; badgeLabel = "Alto fit";
-    title = `Obrigado, ${candidato.split(" ")[0]}!`;
-    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
-  } else if (pct >= 55) {
-    badgeClass = "badge-medio"; badgeLabel = "Médio fit";
-    title = `Obrigado, ${candidato.split(" ")[0]}!`;
-    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
-  } else {
-    badgeClass = "badge-baixo"; badgeLabel = "Baixo fit";
-    title = `Obrigado, ${candidato.split(" ")[0]}!`;
-    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
-  }
-
-  document.getElementById("result-score").style.display = "none";
-  document.getElementById("result-badge").style.display = "none";
-  document.getElementById("result-title").textContent = title;
-  document.getElementById("result-desc").textContent = desc;
+  document.getElementById("result-title").textContent = `Obrigado, ${candidato.split(" ")[0]}!`;
+  document.getElementById("result-desc").textContent = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
 }
 
-// Pega nome do candidato via URL ?candidato=Nome
 const params = new URLSearchParams(window.location.search);
 if (params.get("candidato")) document.getElementById("candidato").value = decodeURIComponent(params.get("candidato"));
 
