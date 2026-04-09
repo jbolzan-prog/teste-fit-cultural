@@ -219,8 +219,8 @@ function showResult(candidato, pct) {
     desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
   }
 
-  document.getElementById("result-score").textContent = pct + "%";
-  document.getElementById("result-badge").innerHTML = `<span class="fit-badge ${badgeClass}">${badgeLabel}</span>`;
+  document.getElementById("result-score").style.display = "none";
+  document.getElementById("result-badge").style.display = "none";
   document.getElementById("result-title").textContent = title;
   document.getElementById("result-desc").textContent = desc;
 }
