@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste de Fit Cultural — Axenya</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  .logo { font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #534AB7; margin-bottom: 2.5rem; }
+  .header { margin-bottom: 2.5rem; }
+  .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .header p { font-size: 15px; color: #555; line-height: 1.6; }
+  .candidato-box { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 2rem; }
+  .candidato-box label { font-size: 13px; font-weight: 500; color: #555; display: block; margin-bottom: 6px; }
+  .candidato-box input { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; font-size: 15px; outline: none; transition: border 0.2s; }
+  .candidato-box input:focus { border-color: #534AB7; }
+  .progress-bar { width: 100%; height: 4px; background: #e5e5e5; border-radius: 2px; margin-bottom: 2rem; }
+  .progress-fill { height: 100%; background: #534AB7; border-radius: 2px; transition: width 0.3s; }
+  .section { margin-bottom: 2.5rem; }
+  .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin-bottom: 0.75rem; }
+  .section-name { font-size: 16px; font-weight: 600; color: #1a1a1a; margin-bottom: 1rem; }
+  .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.25rem; margin-bottom: 0.75rem; }
+  .card p { font-size: 15px; color: #1a1a1a; line-height: 1.5; margin-bottom: 1rem; }
+  .likert { display: flex; gap: 8px; }
+  .likert label { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+  .likert input { display: none; }
+  .likert-circle { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid #ddd; background: #f9f9f9; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: #888; transition: all 0.15s; cursor: pointer; }
+  .likert input:checked + .likert-circle { background: #534AB7; border-color: #534AB7; color: #fff; }
+  .likert label:hover .likert-circle { border-color: #534AB7; color: #534AB7; }
+  .likert-labels { display: flex; justify-content: space-between; font-size: 11px; color: #aaa; margin-top: 6px; }
+  .btn { width: 100%; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 10px; border: none; background: #534AB7; color: #fff; cursor: pointer; transition: background 0.2s; margin-top: 1rem; }
+  .btn:hover { background: #3C3489; }
+  .btn:disabled { background: #bbb; cursor: not-allowed; }
+  .error-msg { font-size: 13px; color: #c0392b; margin-top: 10px; display: none; }
+  .success-view { display: none; text-align: center; padding: 3rem 1rem; }
+  .success-view h2 { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
+  .success-view p { font-size: 15px; color: #555; line-height: 1.6; }
+  .score-total { font-size: 48px; font-weight: 700; color: #534AB7; margin: 1.5rem 0 0.5rem; }
+  .fit-badge { display: inline-block; padding: 6px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 1.5rem; }
+  .badge-alto { background: #E1F5EE; color: #0F6E56; }
+  .badge-medio { background: #FAEEDA; color: #854F0B; }
+  .badge-baixo { background: #FCEBEB; color: #A32D2D; }
+  @media (max-width: 480px) { .likert-circle { width: 30px; height: 30px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Axenya</div>
+
+  <div id="test-view">
+    <div class="header">
+      <h1>Teste de fit cultural</h1>
+      <p>Indique o quanto cada afirmação reflete sua forma de trabalhar. Não há respostas certas ou erradas — seja honesto(a).</p>
+    </div>
+
+    <div class="candidato-box">
+      <label for="candidato">Seu nome completo</label>
+      <input type="text" id="candidato" placeholder="Ex: Maria Silva" />
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+    <div id="questions"></div>
+
+    <button class="btn" id="submit-btn" onclick="submitTest()">Enviar respostas</button>
+    <p class="error-msg" id="error-msg"></p>
+  </div>
+
+  <div class="success-view" id="success-view">
+    <p style="font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:#888;">Resultado</p>
+    <div class="score-total" id="result-score"></div>
+    <div id="result-badge"></div>
+    <h2 id="result-title"></h2>
+    <p id="result-desc"></p>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbyZ_TnByO8xX30Cjti5Sm6Y52ScCAu8656DoNveKapHmXi5wYFbAp_6j1IBk8KVDSUB_w/exec";
+
+const values = [
+  { id: "v1", name: "Os interesses do cliente em primeiro lugar", questions: [
+    "Antes de tomar uma decisão, costumo me perguntar como ela impacta o cliente final.",
+    "Prefiro abrir mão de um resultado interno favorável quando isso beneficia o cliente a longo prazo.",
+    "Acredito que a confiança e a lealdade dos clientes são vantagens competitivas mais duradouras do que métricas de curto prazo."
+  ]},
+  { id: "v2", name: "Cada detalhe importa", questions: [
+    "Tenho dificuldade em entregar algo que considero abaixo do padrão, mesmo sob pressão de tempo.",
+    "Costumo perceber imperfeições ou inconsistências que outros passam despercebidos.",
+    "Sinto orgulho genuíno quando entrego um trabalho do qual posso me orgulhar inteiramente."
+  ]},
+  { id: "v3", name: "Voe mais alto, sonhe mais longe", questions: [
+    "Quando defino metas, prefiro colocar alvos ambiciosos que me desafiem de verdade.",
+    "Não me contento facilmente com o resultado 'suficiente' — busco o extraordinário.",
+    "Encaro obstáculos grandes como oportunidades, não como motivos para reduzir expectativas."
+  ]},
+  { id: "v4", name: "Pense rizomaticamente", questions: [
+    "Me adapto bem a ambientes onde as responsabilidades não são rigidamente definidas.",
+    "Prefiro tomar iniciativas e agir com autonomia do que aguardar aprovações hierárquicas.",
+    "Consigo colaborar de forma eficaz com pessoas de diferentes áreas sem precisar de estrutura formal."
+  ]},
+  { id: "v5", name: "Transforme erros em sabedoria", questions: [
+    "Quando cometo um erro, meu foco principal é entender o que aconteceu e como evitar no futuro.",
+    "Me sinto confortável em admitir falhas para minha equipe quando elas ocorrem.",
+    "Vejo ambientes onde errar é punido como pouco propícios ao meu desenvolvimento."
+  ]},
+  { id: "v6", name: "Ações transparentes, resultados tangíveis", questions: [
+    "Comunico proativamente quando um prazo ou entrega está em risco, antes de ser cobrado.",
+    "Assumo responsabilidade total pelas minhas entregas, sem transferir a culpa para fatores externos.",
+    "Considero a transparência no processo tão importante quanto a qualidade do resultado final."
+  ]},
+  { id: "v7", name: "O navio é nosso", questions: [
+    "Quando vejo um problema fora da minha área, sinto que também é minha responsabilidade resolvê-lo.",
+    "Prefiro colaborar ativamente na solução de desafios coletivos do que focar exclusivamente nas minhas tarefas.",
+    "Tenho dificuldade em ver um colega sobrecarregado sem oferecer ajuda, mesmo sem ser solicitado."
+  ]}
+];
+
+function buildQuestions() {
+  const container = document.getElementById("questions");
+  values.forEach((v, vi) => {
+    const sec = document.createElement("div");
+    sec.className = "section";
+    sec.innerHTML = `<div class="section-title">Valor ${vi+1} de ${values.length}</div><div class="section-name">${v.name}</div>`;
+    v.questions.forEach((q, qi) => {
+      const qid = `${v.id}_q${qi+1}`;
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <p>${q}</p>
+        <div class="likert">
+          ${[1,2,3,4,5].map(n => `
+            <label>
+              <input type="radio" name="${qid}" value="${n}" onchange="updateProgress()">
+              <div class="likert-circle">${n}</div>
+            </label>`).join("")}
+        </div>
+        <div class="likert-labels"><span>Discordo totalmente</span><span>Concordo totalmente</span></div>
+      `;
+      sec.appendChild(card);
+    });
+    container.appendChild(sec);
+  });
+}
+
+function updateProgress() {
+  const total = values.reduce((s, v) => s + v.questions.length, 0);
+  const answered = document.querySelectorAll("input[type=radio]:checked").length;
+  document.getElementById("progress").style.width = Math.round((answered / total) * 100) + "%";
+}
+
+function submitTest() {
+  const candidato = document.getElementById("candidato").value.trim();
+  const errEl = document.getElementById("error-msg");
+  errEl.style.display = "none";
+
+  if (!candidato) { errEl.textContent = "Por favor, informe seu nome completo."; errEl.style.display = "block"; return; }
+
+  const allNames = [];
+  values.forEach(v => v.questions.forEach((_, qi) => allNames.push(`${v.id}_q${qi+1}`)));
+  const unanswered = allNames.filter(n => !document.querySelector(`input[name="${n}"]:checked`));
+  if (unanswered.length > 0) { errEl.textContent = "Por favor, responda todas as perguntas antes de enviar."; errEl.style.display = "block"; return; }
+
+  const payload = { candidato };
+  let grandTotal = 0, grandMax = 0;
+  const scoresByValue = {};
+
+  values.forEach(v => {
+    let vSum = 0;
+    v.questions.forEach((_, qi) => {
+      const qid = `${v.id}_q${qi+1}`;
+      const val = parseInt(document.querySelector(`input[name="${qid}"]:checked`).value);
+      payload[qid] = val;
+      vSum += val;
+    });
+    grandTotal += vSum;
+    grandMax += v.questions.length * 5;
+    scoresByValue[v.id] = vSum;
+  });
+
+  const pct = Math.round((grandTotal / grandMax) * 100);
+  payload.scores = { total: pct, ...scoresByValue };
+
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Enviando...";
+
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    showResult(candidato, pct);
+  }).catch(() => {
+    showResult(candidato, pct);
+  });
+}
+
+function showResult(candidato, pct) {
+  document.getElementById("test-view").style.display = "none";
+  const sv = document.getElementById("success-view");
+  sv.style.display = "block";
+
+  let badgeClass, badgeLabel, title, desc;
+  if (pct >= 80) {
+    badgeClass = "badge-alto"; badgeLabel = "Alto fit";
+    title = `Obrigado, ${candidato.split(" ")[0]}!`;
+    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
+  } else if (pct >= 55) {
+    badgeClass = "badge-medio"; badgeLabel = "Médio fit";
+    title = `Obrigado, ${candidato.split(" ")[0]}!`;
+    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
+  } else {
+    badgeClass = "badge-baixo"; badgeLabel = "Baixo fit";
+    title = `Obrigado, ${candidato.split(" ")[0]}!`;
+    desc = "Suas respostas foram enviadas com sucesso. Nossa equipe de People entrará em contato em breve.";
+  }
+
+  document.getElementById("result-score").textContent = pct + "%";
+  document.getElementById("result-badge").innerHTML = `<span class="fit-badge ${badgeClass}">${badgeLabel}</span>`;
+  document.getElementById("result-title").textContent = title;
+  document.getElementById("result-desc").textContent = desc;
+}
+
+// Pega nome do candidato via URL ?candidato=Nome
+const params = new URLSearchParams(window.location.search);
+if (params.get("candidato")) document.getElementById("candidato").value = decodeURIComponent(params.get("candidato"));
+
+buildQuestions();
+</script>
+</body>
+</html>
