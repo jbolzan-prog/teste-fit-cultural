@@ -7,33 +7,25 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fff; color: #0a0a0a; min-height: 100vh; }
-
   header { border-bottom: 1px solid #e8e8e8; padding: 0 2rem; height: 64px; display: flex; align-items: center; }
   header img { height: 28px; }
-
   .hero { background: #0a0a0a; color: #fff; padding: 4rem 1rem 3rem; text-align: center; }
   .hero p { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #888; margin-bottom: 1rem; }
   .hero h1 { font-size: 28px; font-weight: 600; line-height: 1.3; max-width: 480px; margin: 0 auto; }
-
   .wrap { max-width: 640px; margin: 0 auto; padding: 2.5rem 1rem 5rem; }
-
   .candidato-box { border: 1px solid #e8e8e8; border-radius: 4px; padding: 1.25rem; margin-bottom: 2rem; }
   .candidato-box label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; display: block; margin-bottom: 8px; }
   .candidato-box input { width: 100%; border: 1px solid #ddd; border-radius: 3px; padding: 10px 12px; font-size: 15px; outline: none; transition: border 0.2s; background: #fafafa; }
   .candidato-box input:focus { border-color: #0a0a0a; background: #fff; }
-
   .progress-wrap { margin-bottom: 2.5rem; }
   .progress-label { font-size: 12px; color: #aaa; margin-bottom: 6px; }
   .progress-bar { width: 100%; height: 2px; background: #eee; }
   .progress-fill { height: 100%; background: #0a0a0a; transition: width 0.3s; }
-
   .section { margin-bottom: 2.5rem; }
   .section-tag { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #aaa; margin-bottom: 4px; }
   .section-name { font-size: 15px; font-weight: 600; color: #0a0a0a; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f0f0f0; }
-
   .card { padding: 1.25rem 0; border-bottom: 1px solid #f0f0f0; }
   .card p { font-size: 15px; color: #1a1a1a; line-height: 1.6; margin-bottom: 1.25rem; }
-
   .likert { display: flex; gap: 8px; }
   .likert label { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
   .likert input { display: none; }
@@ -41,22 +33,19 @@
   .likert input:checked + .likert-circle { background: #0a0a0a; border-color: #0a0a0a; color: #fff; }
   .likert label:hover .likert-circle { border-color: #0a0a0a; color: #0a0a0a; }
   .likert-labels { display: flex; justify-content: space-between; font-size: 10px; color: #bbb; margin-top: 8px; letter-spacing: 0.02em; }
-
+  .select-wrap select { width: 100%; border: 1px solid #ddd; border-radius: 3px; padding: 10px 12px; font-size: 15px; outline: none; background: #fafafa; color: #1a1a1a; cursor: pointer; transition: border 0.2s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  .select-wrap select:focus { border-color: #0a0a0a; background-color: #fff; }
   .btn { width: 100%; padding: 14px; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 3px; border: none; background: #0a0a0a; color: #fff; cursor: pointer; transition: background 0.2s; margin-top: 2rem; }
   .btn:hover { background: #333; }
   .btn:disabled { background: #ccc; cursor: not-allowed; }
-
   .error-msg { font-size: 13px; color: #c0392b; margin-top: 10px; display: none; }
-
   .success-view { display: none; }
   .success-hero { background: #0a0a0a; color: #fff; padding: 5rem 1rem; text-align: center; min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .success-hero .tag { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-bottom: 1.5rem; }
   .success-hero h2 { font-size: 26px; font-weight: 600; margin-bottom: 1rem; }
   .success-hero p { font-size: 15px; color: #aaa; max-width: 400px; line-height: 1.7; }
-
   footer { border-top: 1px solid #e8e8e8; padding: 2rem; text-align: center; }
   footer img { height: 20px; opacity: 0.4; }
-
   @media (max-width: 480px) { .hero h1 { font-size: 22px; } .likert-circle { width: 30px; height: 30px; font-size: 11px; } }
 </style>
 </head>
@@ -79,11 +68,12 @@
     </div>
 
     <div class="progress-wrap">
-      <div class="progress-label" id="progress-label">0 de 21 perguntas respondidas</div>
+      <div class="progress-label" id="progress-label">0 de 23 perguntas respondidas</div>
       <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
     </div>
 
     <div id="questions"></div>
+    <div id="situacional"></div>
 
     <button class="btn" id="submit-btn" onclick="submitTest()">Enviar respostas</button>
     <p class="error-msg" id="error-msg"></p>
@@ -142,7 +132,30 @@ const values = [
   ]}
 ];
 
-const TOTAL_Q = values.reduce((s, v) => s + v.questions.length, 0);
+const situacionalQuestions = [
+  {
+    id: "sit_q1",
+    text: "Quando preciso tomar uma decisão sem ter todas as informações, costumo:",
+    options: [
+      { label: "Tomar a decisão com o que tenho e ajustar no caminho.", score: 5 },
+      { label: "Escalar para alguém com mais experiência decidir.", score: 3 },
+      { label: "Esperar até ter mais clareza antes de agir.", score: 3 },
+      { label: "Evitar a decisão até que alguém me dê direção.", score: 1 }
+    ]
+  },
+  {
+    id: "sit_q2",
+    text: "Quando vejo um problema que não é da minha área, costumo:",
+    options: [
+      { label: "Me envolver ativamente para ajudar a resolver.", score: 5 },
+      { label: "Reportar para quem é responsável e seguir em frente.", score: 3 },
+      { label: "Observar e só agir se alguém me pedir.", score: 1 },
+      { label: "Ignorar — cada um tem suas responsabilidades.", score: 1 }
+    ]
+  }
+];
+
+const TOTAL_Q = values.reduce((s, v) => s + v.questions.length, 0) + situacionalQuestions.length;
 
 function buildQuestions() {
   const container = document.getElementById("questions");
@@ -169,10 +182,39 @@ function buildQuestions() {
     });
     container.appendChild(sec);
   });
+
+  const sitContainer = document.getElementById("situacional");
+  const sitSec = document.createElement("div");
+  sitSec.className = "section";
+  sitSec.innerHTML = `<div class="section-tag">Perguntas situacionais</div><div class="section-name">Como você age na prática</div>`;
+
+  situacionalQuestions.forEach(q => {
+    const card = document.createElement("div");
+    card.className = "card";
+    const opts = q.options.map((o, i) =>
+      `<option value="${i}">${o.label}</option>`
+    ).join("");
+    card.innerHTML = `
+      <p>${q.text}</p>
+      <div class="select-wrap">
+        <select id="${q.id}" onchange="updateProgress()">
+          <option value="" disabled selected>Selecione uma opção</option>
+          ${opts}
+        </select>
+      </div>
+    `;
+    sitSec.appendChild(card);
+  });
+  sitContainer.appendChild(sitSec);
 }
 
 function updateProgress() {
-  const answered = document.querySelectorAll("input[type=radio]:checked").length;
+  const likertAnswered = document.querySelectorAll("input[type=radio]:checked").length;
+  const sitAnswered = situacionalQuestions.filter(q => {
+    const el = document.getElementById(q.id);
+    return el && el.value !== "";
+  }).length;
+  const answered = likertAnswered + sitAnswered;
   document.getElementById("progress").style.width = Math.round((answered / TOTAL_Q) * 100) + "%";
   document.getElementById("progress-label").textContent = `${answered} de ${TOTAL_Q} perguntas respondidas`;
 }
@@ -184,14 +226,19 @@ function submitTest() {
 
   if (!candidato) { errEl.textContent = "Por favor, informe seu nome completo."; errEl.style.display = "block"; return; }
 
-  const allNames = [];
-  values.forEach(v => v.questions.forEach((_, qi) => allNames.push(`${v.id}_q${qi+1}`)));
-  const unanswered = allNames.filter(n => !document.querySelector(`input[name="${n}"]:checked`));
-  if (unanswered.length > 0) { errEl.textContent = "Por favor, responda todas as perguntas antes de enviar."; errEl.style.display = "block"; return; }
+  const allLikert = [];
+  values.forEach(v => v.questions.forEach((_, qi) => allLikert.push(`${v.id}_q${qi+1}`)));
+  const unanswered = allLikert.filter(n => !document.querySelector(`input[name="${n}"]:checked`));
+  const sitUnanswered = situacionalQuestions.filter(q => !document.getElementById(q.id).value);
+
+  if (unanswered.length > 0 || sitUnanswered.length > 0) {
+    errEl.textContent = "Por favor, responda todas as perguntas antes de enviar.";
+    errEl.style.display = "block";
+    return;
+  }
 
   const payload = { candidato };
   let grandTotal = 0, grandMax = 0;
-  const scoresByValue = {};
 
   values.forEach(v => {
     let vSum = 0;
@@ -204,11 +251,19 @@ function submitTest() {
     });
     grandTotal += vSum;
     grandMax += v.questions.length * 5;
-    scoresByValue[v.id] = vSum;
+  });
+
+  situacionalQuestions.forEach(q => {
+    const idx = parseInt(document.getElementById(q.id).value);
+    const scored = q.options[idx].score;
+    const label = q.options[idx].label;
+    payload[q.id] = label;
+    grandTotal += scored;
+    grandMax += 5;
   });
 
   const pct = Math.round((grandTotal / grandMax) * 100);
-  payload.scores = { total: pct, ...scoresByValue };
+  payload.scores = { total: pct };
 
   const btn = document.getElementById("submit-btn");
   btn.disabled = true;
